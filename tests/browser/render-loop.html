@@ -1,0 +1,9 @@
+<!doctype html><meta charset="utf-8"><title>后台渲染验证 · 无业务操作</title>
+<style>body{font:16px system-ui;background:#eff6ff;color:#173a59;padding:32px}output{display:block;padding:18px;background:white;margin:16px 0}iframe{width:100%;height:150px;border:1px solid #abc}</style>
+<h1>后台渲染验证</h1><p>此页面仅测试动画帧与可见性，不连接 ERP，不发送审批请求。</p>
+<output id="state"></output><iframe src="render-frame.html"></iframe>
+<script>
+let frames=0;
+function tick(){frames++;document.querySelector('#state').textContent=JSON.stringify({frames,visibility:document.visibilityState,focused:document.hasFocus()});requestAnimationFrame(tick);}
+requestAnimationFrame(tick);
+</script>

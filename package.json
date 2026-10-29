@@ -1,0 +1,14 @@
+{
+  "name": "yonbip-approval-assistant",
+  "version": "0.3.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check engine.js && node --check content.js && node --check background.js && node --check continuous.js && node --check config.js",
+    "configure": "node scripts/configure.mjs",
+    "package": "node scripts/package.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}

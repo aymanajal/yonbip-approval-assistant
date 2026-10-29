@@ -1,0 +1,2 @@
+<!doctype html><meta charset="utf-8"><title>子页面渲染验证</title><output id="child"></output>
+<script>let frames=0;function tick(){document.querySelector('#child').textContent=JSON.stringify({childFrames:++frames,visibility:document.visibilityState});requestAnimationFrame(tick);}requestAnimationFrame(tick);</script>

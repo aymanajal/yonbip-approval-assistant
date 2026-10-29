@@ -1,0 +1,34 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+test('同环境互斥运行；其他环境独立；旧文档不能释放新文档的运行锁',async()=>{
+  let handler;const data={},updates=[];
+  const chrome={runtime:{onMessage:{addListener:f=>handler=f}},tabs:{update:async(tab,values)=>updates.push({tab,...values}),onRemoved:{addListener:()=>{}}},storage:{session:{get:async key=>key?{[key]:data[key]}:{...data},set:async d=>Object.assign(data,d),remove:async key=>{for(const k of [].concat(key))delete data[k];}}}};
+  vm.runInNewContext(fs.readFileSync('background.js','utf8'),{chrome,URL,setTimeout});
+  const send=(type,token,tab=1,doc='a',origin='http://127.0.0.1:8080')=>new Promise(resolve=>handler({type,token},{tab:{id:tab},frameId:2,documentId:doc,url:origin+'/nccloud/resources/ssctp/sscuser/sscapprove/list/index.html'},resolve));
+  assert.equal((await send('approval-lock','one')).ok,true);
+  assert.equal((await send('approval-lock','two',2)).ok,false);
+  assert.equal((await send('approval-lock','other',3,'c','http://127.0.0.1:9080')).ok,true);
+  assert.equal((await send('approval-lock','reload',1,'b')).ok,true);
+  await send('approval-unlock','one',1,'a');
+  assert.equal((await send('approval-lock','blocked',2)).ok,false);
+  await send('approval-unlock','reload',1,'b');
+  assert.equal(updates.at(-1).autoDiscardable,true);
+  assert.ok(updates.every(x=>Object.keys(x).sort().join(',')==='autoDiscardable,tab'));
+  assert.equal((await send('approval-lock','next',2)).ok,true);
+});
+test('后台等待使用 worker 计时器，不会阻塞锁消息；拒绝超长或跨来源请求',async()=>{
+  let handler;const data={},timers=[];
+  const chrome={runtime:{onMessage:{addListener:f=>handler=f}},tabs:{update:async()=>{},onRemoved:{addListener:()=>{}}},storage:{session:{get:async key=>({[key]:data[key]}),set:async d=>Object.assign(data,d),remove:async key=>delete data[key]}}};
+  vm.runInNewContext(fs.readFileSync('background.js','utf8'),{chrome,URL,setTimeout:(fn,ms)=>timers.push({fn,ms})});
+  const sender={tab:{id:1,autoDiscardable:false},frameId:2,documentId:'a',url:'http://127.0.0.1:8080/nccloud/resources/ssctp/sscuser/sscapprove/list/index.html'};
+  let result;assert.equal(handler({type:'approval-wait',ms:400},sender,r=>result=r),true);
+  assert.equal(result,undefined);await new Promise(r=>setImmediate(r));assert.equal(timers[0].ms,400);
+  const lock=await new Promise(r=>handler({type:'approval-lock',token:'x'},sender,r));assert.equal(lock.ok,true);
+  timers[0].fn();await new Promise(r=>setImmediate(r));assert.equal(result.ok,true);
+  handler({type:'approval-wait',ms:90000},sender,r=>result=r);assert.equal(result.ok,false);
+  handler({type:'approval-wait',ms:400},{...sender,url:'https://example.com/'},r=>result=r);assert.equal(result.ok,false);
+  await new Promise(r=>handler({type:'approval-unlock',token:'x'},sender,r));
+  assert.equal(data['lock:http://127.0.0.1:8080'],undefined);
+});

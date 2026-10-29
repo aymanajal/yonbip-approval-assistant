@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "我的审核 · 顺序审批助手",
+  "version": "0.3.0",
+  "minimum_chrome_version": "118",
+  "description": "逐张打开我的审核单据，留空意见审批；支持试运行、暂停和本地日志。",
+  "permissions": [
+    "storage",
+    "debugger"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://127.0.0.1:8080/nccloud/resources/ssctp/sscuser/sscapprove/list/*",
+        "http://127.0.0.1:9080/nccloud/resources/ssctp/sscuser/sscapprove/list/*"
+      ],
+      "js": [
+        "engine.js",
+        "content.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/rei-background.png"
+      ],
+      "matches": [
+        "http://127.0.0.1:8080/*",
+        "http://127.0.0.1:9080/*"
+      ]
+    }
+  ]
+}

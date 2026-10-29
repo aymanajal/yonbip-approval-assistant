@@ -1,0 +1,4 @@
+工具：内置 image_gen；新建插画，用作插件绫波丽主题背景。
+
+Prompt:
+Create a polished anime illustration background asset for a narrow vertical desktop browser extension utility panel. Recognizable Rei Ayanami (绫波丽) from Neon Genesis Evangelion, short pale icy blue bob hair, red eyes, calm gentle expression, wearing her white school blouse with blue pinafore uniform, modest fully clothed portrait framed from shoulders up. Vertical 2:3 composition. Her face occupies the upper right half with a generous area of airy pale blue and white atmosphere to the left and lower half for later UI overlay. Subtle cloudy sky, tiny distant red accent, clean expressive hand-drawn anime linework, delicate cel shading, luminous cool daylight, restrained detailed illustration, serene and refined. No text, no letters, no logo, no watermark, no interface controls. This is illustration artwork only, not a mockup.
